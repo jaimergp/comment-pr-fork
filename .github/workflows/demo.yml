@@ -21,6 +21,7 @@ jobs:
           sleep 10
 
   demo_report:
+    needs: demo
     if: github.event_name == 'pull_request_target'
     # if: ${{ github.event.label.name == 'run-benchmark' && github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
     name: Report
