@@ -68,5 +68,5 @@ jobs:
               issue_number: ${{ github.event.number }},
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Benchmarks are running! Check [logs here](${ thisJob.html_url }).`
+              body: `Benchmarks are running! Check [logs here](${chosenRun.repository.html_url}/pull/${chosenRun.pull_requests[0].number}/checks?check_run_id=${thisJob.id}).`
             })
