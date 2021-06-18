@@ -40,7 +40,7 @@ jobs:
             const { data: runs } = await github.actions.listWorkflowRuns({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                workflow_id: "demo.yml",
+                workflow_id: context.workflow,
                 event: "pull_request",
               })
 
