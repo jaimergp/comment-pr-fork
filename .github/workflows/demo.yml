@@ -1,0 +1,40 @@
+name: Demo
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled]
+  pull_request_target:
+    types: [opened, reopened, synchronize, labeled]
+
+jobs:
+  demo:
+    if: github.event_name == 'pull_request'
+    # if: ${{ github.event.label.name == 'run-benchmark' && github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+    name: Linux
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Do something
+        run: |
+          sleep 10
+
+  demo_report:
+    if: github.event_name == 'pull_request_target'
+    # if: ${{ github.event.label.name == 'run-benchmark' && github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+    name: Report
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Post link to logs
+        if: always()
+        uses: actions/github-script@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: ${{ github.event.number }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Benchmarks are running! Check [logs here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).`
+            })
