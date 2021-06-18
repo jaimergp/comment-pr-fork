@@ -8,7 +8,7 @@ on:
 
 jobs:
   demo:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.label.name == 'run-benchmark'
     # if: ${{ github.event.label.name == 'run-benchmark' && github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
     name: Linux
     runs-on: ubuntu-20.04
@@ -21,7 +21,7 @@ jobs:
           sleep 10
 
   demo_report:
-    if: github.event_name == 'pull_request_target'
+    if: github.event_name == 'pull_request_target' && github.event.label.name == 'run-benchmark'
     # if: ${{ github.event.label.name == 'run-benchmark' && github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
     name: Report
     runs-on: ubuntu-20.04
