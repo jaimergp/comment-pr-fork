@@ -45,16 +45,28 @@ jobs:
               })
 
             const workflow_runs = runs.workflow_runs;
-            workflow_runs.sort((a, b) => a.created_at.localeCompare(b.created_at))
+            workflow_runs.sort((a, b) => b.created_at.localeCompare(a.created_at))
             for (const run of workflow_runs){
                 if (thisRun.head_sha == run.head_sha && run.id != thisRun.id){
-                    var lastRun = run;
+                    var chosenRun = run;
+                    break;
                 }
+            }
+            const { data: jobs } = await github.actions.listJobsForWorkflowRun({
+              owner: "jaimergp",
+              repo: "comment-pr-fork",
+              run_id: chosenRun.id,
+            })
+            for (const job of jobs.jobs){
+              if ( job.conclusion != "skipped" ){
+                var thisJob = job;
+                break
+              }
             }
 
             github.issues.createComment({
               issue_number: ${{ github.event.number }},
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Benchmarks are running! Check [logs here](${ lastRun.html_url }).`
+              body: `Benchmarks are running! Check [logs here](${ thisJob.html_url }).`
             })
