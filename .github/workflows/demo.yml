@@ -21,21 +21,40 @@ jobs:
           sleep 10
 
   demo_report:
-    needs: demo
     if: github.event_name == 'pull_request_target'
     # if: ${{ github.event.label.name == 'run-benchmark' && github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
     name: Report
     runs-on: ubuntu-20.04
     steps:
-      - name: Post link to logs
-        if: always()
-        uses: actions/github-script@v2
+      - name: Find run id of demo and post log URL
+        id: demo_id
+        uses: actions/github-script@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const { data: thisRun } = await github.actions.getWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: ${{ github.run_id }},
+            })
+
+            const { data: runs } = await github.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: "demo.yml",
+                event: "pull_request",
+              })
+
+            const workflow_runs = runs.workflow_runs;
+            workflow_runs.sort((a, b) => a.created_at.localeCompare(b.created_at))
+            for (const run of workflow_runs){
+                if (thisRun.head_sha == run.head_sha && run.id != thisRun.id){
+                    var lastRun = run;
+                }
+            }
+
             github.issues.createComment({
               issue_number: ${{ github.event.number }},
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Benchmarks are running! Check [logs here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).`
+              body: `Benchmarks are running! Check [logs here](${ lastRun.html_url }).`
             })
